@@ -1,12 +1,14 @@
 package com.example.payment.service;
 
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
 import com.example.payment.domain.Payment;
 import com.example.payment.dto.OrderRequest;
 import com.example.payment.dto.PaymentResult;
 import com.example.payment.repository.PaymentRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

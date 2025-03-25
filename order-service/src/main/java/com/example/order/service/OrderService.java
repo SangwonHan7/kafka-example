@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,8 @@ public class OrderService {
     
     // 주문 결과를 저장할 Map
     private final ConcurrentHashMap<String, CompletableFuture<OrderResponse>> orderResults = new ConcurrentHashMap<>();
+    
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     
     public CompletableFuture<OrderResponse> createOrder(OrderRequest request) {
         // 주문 ID 생성 (없는 경우)
@@ -67,8 +71,13 @@ public class OrderService {
     public void updateOrderStatus(String orderId, String status, String message) {
         Order order = orderRepository.findByOrderId(orderId);
         if (order != null) {
-            order.setStatus(status);
-            orderRepository.save(order);
+            // 결제 실패인 경우 주문 취소 처리
+            if ("ERROR".equals(status) || "FAILED".equals(status)) {
+                compensateOrder(order, message);
+            } else {
+                order.setStatus(status);
+                orderRepository.save(order);
+            }
         }
         
         CompletableFuture<OrderResponse> future = orderResults.get(orderId);
@@ -77,6 +86,26 @@ public class OrderService {
             orderResults.remove(orderId);
         }
     }
+    
+    // 보상 트랜잭션 처리
+    private void compensateOrder(Order order, String failureReason) {
+        try {
+            // 주문 상태를 CANCELLED로 변경
+            order.setStatus("CANCELLED");
+            order.setFailureReason(failureReason);
+            orderRepository.save(order);
+            
+            // 추가적인 보상 로직 구현
+            
+            log.info("Order {} has been compensated due to payment failure: {}", 
+                order.getOrderId(), failureReason);
+            
+        } catch (Exception e) {
+            log.error("Failed to compensate order {}: {}", order.getOrderId(), e.getMessage());
+        }
+    }
+
+
     
     private void setTimeout(String orderId, long timeout) {
         CompletableFuture.delayedExecutor(timeout, java.util.concurrent.TimeUnit.MILLISECONDS)
