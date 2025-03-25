@@ -1,8 +1,0 @@
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\domain\Order.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\OrderApplication.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\kafka\PaymentResultListener.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\dto\OrderResponse.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\repository\OrderRepository.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\service\OrderService.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\controller\OrderController.java
-C:\workspace\git\kafka-example\order-service\src\main\java\com\example\order\dto\OrderRequest.java
