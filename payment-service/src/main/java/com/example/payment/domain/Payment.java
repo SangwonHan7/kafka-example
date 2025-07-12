@@ -19,6 +19,8 @@ public class Payment {
     private String currency;
     private String paymentMethod;
     private String status;
+    private String sagaId;  // Saga 트랜잭션 ID
+    private String failureReason;
     private LocalDateTime createdAt;
     
     @PrePersist

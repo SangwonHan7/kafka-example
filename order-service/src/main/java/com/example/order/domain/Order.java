@@ -25,6 +25,7 @@ public class Order {
     private BigDecimal amount;
     private String status;
     private String failureReason;
+    private String sagaId;  // Saga 트랜잭션 ID 연결
     private LocalDateTime createdAt;
     
     @PrePersist

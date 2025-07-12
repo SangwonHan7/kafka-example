@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -16,19 +18,34 @@ import java.util.concurrent.TimeUnit;
 public class OrderController {
     
     private final OrderService orderService;
-    
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+
+    /**
+     * 주문 생성 API - Saga 패턴 사용
+     */
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
         try {
-            CompletableFuture<OrderResponse> futureResult = orderService.createOrder(orderRequest);
-            OrderResponse result = futureResult.get(31, TimeUnit.SECONDS);
+            log.info("주문 생성 요청: orderId={} (Saga 패턴 사용)", orderRequest.getOrderId());
+            
+            CompletableFuture<OrderResponse> futureResult = orderService.createOrderWithSaga(orderRequest);
+            OrderResponse result = futureResult.get(11, TimeUnit.SECONDS);
+            
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            OrderResponse errorResponse = new OrderResponse(null, "ERROR", e.getMessage());
+            log.error("주문 생성 실패: {}", e.getMessage());
+            OrderResponse errorResponse = new OrderResponse(
+                orderRequest.getOrderId(), 
+                "ERROR", 
+                e.getMessage()
+            );
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
     
+    /**
+     * 주문 조회 API
+     */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrder(orderId));
